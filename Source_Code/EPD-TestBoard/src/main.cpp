@@ -1,27 +1,52 @@
-#include <Arduino.h>
+#include "PDLS_Common.h"
+#include "Pervasive_Wide_Small.h"
 
-#define BUZZER_PIN 10
-#define PWM_CHANNEL 0
-#define PWM_FREQ 2000
-#define PWM_RESOLUTION 8
+// ----------------------
+// Use 417 driver (for your 4.20" screen)
+#define SCRN 417
+#include "globalupdate_src/demoImageData.h"
 
-uint32_t duty50 = 128;   // 50% duty (128/255)
+// ----------------------
+// ESP32-C3 pin configuration
+pins_t myBoard =
+{
+    .scope      = BOARD_EXT3,
+    .panelBusy  = 3,
+    .panelDC    = 1,
+    .panelReset = 2,
+    .flashCS    = NOT_CONNECTED,
+    .panelCS    = 7,
+    .panelCSS   = NOT_CONNECTED,
+    .flashCSS   = NOT_CONNECTED,
+    .touchInt   = NOT_CONNECTED,
+    .touchReset = NOT_CONNECTED,
+    .panelPower = NOT_CONNECTED,
+    .cardCS     = NOT_CONNECTED,
+    .cardDetect = NOT_CONNECTED,
+    .button     = NOT_CONNECTED,
+    .ledData    = NOT_CONNECTED,
+    .nfcFD      = NOT_CONNECTED,
+    .imuInt1    = NOT_CONNECTED,
+    .imuInt2    = NOT_CONNECTED,
+    .weatherInt = NOT_CONNECTED
+};
+
+// ----------------------
+// Driver instance
+Pervasive_Wide_Small myDriver(eScreen_EPD_417_KS_0D, myBoard);
 
 void setup() {
-    ledcSetup(PWM_CHANNEL, PWM_FREQ, PWM_RESOLUTION);
-    ledcAttachPin(BUZZER_PIN, PWM_CHANNEL);
-    ledcWrite(PWM_CHANNEL, 0);
+    hV_HAL_begin();
+    myDriver.begin();
+
+    // Show the prebuilt demo image
+    myDriver.updateNormal(BW_monoBuffer, frameSize);
+
+    // Keep visible for 5 seconds
+    hV_HAL_delayMilliseconds(5000);
+    hV_HAL_exit();
 }
 
 void loop() {
-
-    // Turn buzzer ON (4 kHz, 50%)
-    ledcWrite(PWM_CHANNEL, duty50);
-
-    delay(1000);
-
-    // Turn buzzer OFF
-    ledcWrite(PWM_CHANNEL, 0);
-
-    delay(3000); 
+    // Nothing needed
 }
